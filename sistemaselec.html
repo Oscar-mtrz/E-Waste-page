@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Desperdicio Electrónico</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@300;400;600&family=IBM+Plex+Sans:ital,wght@0,300;0,700;1,300&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --acid: #b5ff2d;
+      --toxic: #ff4d1a;
+      --rust: #c04a00;
+      --dark: #0a0a08;
+      --mid: #1a1a14;
+      --fog: #2a2a20;
+      --pale: #e8e8d8;
+      --dim: #888870;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--dark);
+      color: var(--pale);
+      font-family: 'IBM Plex Mono', monospace;
+      overflow-x: hidden;
+      cursor: crosshair;
+    }
+
+    /* ── NOISE OVERLAY ── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 9999;
+      opacity: .35;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 4rem 2rem;
+      position: relative;
+      overflow: hidden;
+      border-bottom: 1px solid var(--fog);
+    }
+
+    .hero-bg {
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 70% 60% at 80% 50%, rgba(181,255,45,.04) 0%, transparent 70%),
+        radial-gradient(ellipse 50% 40% at 20% 80%, rgba(255,77,26,.06) 0%, transparent 60%);
+    }
+
+    .hero-grid {
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(rgba(181,255,45,.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(181,255,45,.04) 1px, transparent 1px);
+      background-size: 60px 60px;
+      animation: gridDrift 20s linear infinite;
+    }
+
+    @keyframes gridDrift {
+      from { transform: translateY(0); }
+      to   { transform: translateY(60px); }
+    }
+
+    .hero-content { position: relative; z-index: 2; text-align: center; max-width: 900px; }
+
+    .tag {
+      display: inline-block;
+      font-size: .65rem;
+      letter-spacing: .25em;
+      text-transform: uppercase;
+      color: var(--acid);
+      border: 1px solid var(--acid);
+      padding: .3em 1em;
+      margin-bottom: 2rem;
+      animation: fadeIn .8s ease forwards;
+    }
+
+    .hero h1 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(4rem, 12vw, 11rem);
+      line-height: .9;
+      letter-spacing: .02em;
+      color: var(--pale);
+      animation: slideUp .9s ease forwards;
+    }
+
+    .hero h1 span { color: var(--acid); }
+
+    .hero-sub {
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-weight: 300;
+      font-style: italic;
+      font-size: clamp(.85rem, 1.8vw, 1.1rem);
+      color: var(--dim);
+      margin-top: 1.5rem;
+      animation: fadeIn 1.2s ease forwards;
+    }
+
+    .scroll-hint {
+      position: absolute;
+      bottom: 2.5rem; left: 50%;
+      transform: translateX(-50%);
+      display: flex; flex-direction: column; align-items: center; gap: .5rem;
+      font-size: .6rem; letter-spacing: .2em; color: var(--dim);
+      animation: bounce 2s ease infinite;
+    }
+
+    .scroll-hint span { width: 1px; height: 40px; background: linear-gradient(var(--acid), transparent); }
+
+    @keyframes bounce {
+      0%,100% { transform: translateX(-50%) translateY(0); }
+      50%      { transform: translateX(-50%) translateY(8px); }
+    }
+
+    /* ── STAT BAND ── */
+    .stat-band {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      border-bottom: 1px solid var(--fog);
+    }
+
+    .stat-item {
+      padding: 2.5rem 2rem;
+      border-right: 1px solid var(--fog);
+      transition: background .3s;
+    }
+    .stat-item:last-child { border-right: none; }
+    .stat-item:hover { background: var(--mid); }
+
+    .stat-num {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 3.5rem;
+      color: var(--acid);
+      line-height: 1;
+    }
+
+    .stat-label {
+      font-size: .65rem;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+      color: var(--dim);
+      margin-top: .5rem;
+      line-height: 1.5;
+    }
+
+    /* ── SECTIONS ── */
+    .section {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 6rem 2rem;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: baseline;
+      gap: 1.5rem;
+      margin-bottom: 3.5rem;
+      border-bottom: 1px solid var(--fog);
+      padding-bottom: 1.5rem;
+    }
+
+    .section-num {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1rem;
+      color: var(--acid);
+      letter-spacing: .15em;
+    }
+
+    .section-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      letter-spacing: .04em;
+      color: var(--pale);
+    }
+
+    /* ── CAUSE CARDS ── */
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1px;
+      background: var(--fog);
+    }
+
+    .card {
+      background: var(--mid);
+      padding: 2.5rem 2rem;
+      position: relative;
+      overflow: hidden;
+      transition: background .3s, transform .3s;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 3px; height: 100%;
+      background: var(--acid);
+      transform: scaleY(0);
+      transform-origin: bottom;
+      transition: transform .4s ease;
+    }
+
+    .card:hover { background: var(--fog); transform: translateY(-3px); }
+    .card:hover::before { transform: scaleY(1); }
+
+    .card-icon {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+      display: block;
+    }
+
+    .card h3 {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: .8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .2em;
+      color: var(--acid);
+      margin-bottom: .8rem;
+    }
+
+    .card p {
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-weight: 300;
+      font-size: .9rem;
+      line-height: 1.7;
+      color: var(--dim);
+    }
+
+    /* ── CONSEQUENCE ROWS ── */
+    .consequence-list { display: flex; flex-direction: column; gap: 1px; background: var(--fog); }
+
+    .consequence-row {
+      background: var(--mid);
+      display: grid;
+      grid-template-columns: 200px 1fr;
+      gap: 2rem;
+      padding: 2rem 2.5rem;
+      align-items: start;
+      transition: background .3s;
+    }
+
+    .consequence-row:hover { background: var(--fog); }
+
+    .consequence-label {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.4rem;
+      letter-spacing: .05em;
+      line-height: 1.1;
+    }
+
+    .consequence-label.health { color: var(--toxic); }
+    .consequence-label.env    { color: #2dd4bf; }
+    .consequence-label.social { color: #f59e0b; }
+    .consequence-label.econ   { color: var(--acid); }
+
+    .consequence-row p {
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-weight: 300;
+      font-size: .9rem;
+      line-height: 1.75;
+      color: var(--dim);
+    }
+
+    .consequence-row p strong {
+      color: var(--pale);
+      font-weight: 700;
+    }
+
+    /* ── TOXIC BAR ── */
+    .toxic-section {
+      background: var(--mid);
+      border-top: 1px solid var(--fog);
+      border-bottom: 1px solid var(--fog);
+      padding: 5rem 2rem;
+    }
+
+    .toxic-inner { max-width: 1100px; margin: 0 auto; }
+
+    .toxic-header {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(1.8rem, 4vw, 3rem);
+      margin-bottom: 3rem;
+      color: var(--toxic);
+    }
+
+    .chemical-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 2rem;
+    }
+
+    .chemical-item {}
+
+    .chemical-name {
+      font-size: .7rem;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: var(--pale);
+      margin-bottom: .8rem;
+    }
+
+    .bar-track {
+      height: 6px;
+      background: var(--fog);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      background: var(--toxic);
+      width: 0;
+      transition: width 1.5s cubic-bezier(.16,1,.3,1);
+    }
+
+    .bar-fill.acid-color { background: var(--acid); }
+
+    .chemical-desc {
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-weight: 300;
+      font-size: .75rem;
+      color: var(--dim);
+      margin-top: .5rem;
+      line-height: 1.5;
+    }
+
+    /* ── SOLUTIONS ── */
+    .solution-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .solution-card {
+      border: 1px solid var(--fog);
+      padding: 2rem;
+      position: relative;
+      transition: border-color .3s, background .3s;
+    }
+
+    .solution-card:hover {
+      border-color: var(--acid);
+      background: rgba(181,255,45,.03);
+    }
+
+    .solution-num {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 4rem;
+      color: var(--fog);
+      line-height: 1;
+      margin-bottom: .5rem;
+      transition: color .3s;
+    }
+
+    .solution-card:hover .solution-num { color: rgba(181,255,45,.15); }
+
+    .solution-card h3 {
+      font-size: .75rem;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: var(--acid);
+      margin-bottom: .8rem;
+    }
+
+    .solution-card p {
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-weight: 300;
+      font-size: .85rem;
+      line-height: 1.7;
+      color: var(--dim);
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 1px solid var(--fog);
+      padding: 3rem 2rem;
+      text-align: center;
+    }
+
+    footer p {
+      font-size: .65rem;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: var(--dim);
+      line-height: 2;
+    }
+
+    footer span { color: var(--acid); }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeIn  { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes slideUp { from { opacity:0; transform:translateY(30px); } to { opacity:1; transform:translateY(0); } }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity .7s ease, transform .7s ease;
+    }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    /* ── RESPONSIVE ── */
+    @media(max-width:600px) {
+      .consequence-row { grid-template-columns: 1fr; }
+      .stat-band { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══ HERO ══════════════════════════════════════ -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-content">
+    <div class="tag">Informe 2026 · Basura Tecnológica</div>
+    <h1>E-<span>WASTE</span>
+    <p class="hero-sub">El desecho de sistemas electrónicos: la crisis ambiental que el progreso prefiere ignorar</p>
+  </div>
+  <div class="scroll-hint">
+    SCROLL
+    <span></span>
+  </div>
+</section>
+
+<!-- ══ CIFRAS ══════════════════════════════════════ -->
+<div class="stat-band reveal">
+  <div class="stat-item">
+    <div class="stat-num">62M</div>
+    <div class="stat-label">toneladas de e-waste generadas globalmente en 2023</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-num">22%</div>
+    <div class="stat-label">del total es reciclado de forma segura y documentada</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-num">$57B</div>
+    <div class="stat-label">en materiales valiosos descartados cada año</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-num">3×</div>
+    <div class="stat-label">más rápido que cualquier otra corriente de residuos sólidos</div>
+  </div>
+</div>
+
+<!-- ══ CAUSAS ══════════════════════════════════════ -->
+<section class="section">
+  <div class="section-header reveal">
+    <span class="section-num">01 //</span>
+    <h2 class="section-title">CAUSAS RAÍZ</h2>
+  </div>
+
+  <div class="cards reveal">
+    <div class="card">
+      <span class="card-icon">📱</span>
+      <h3>Obsolescencia Programada</h3>
+      <p>Los fabricantes diseñan dispositivos con vida útil artificialmente corta. Actualizaciones de software fuerzan el reemplazo de hardware funcional, generando millones de unidades descartadas prematuramente.</p>
+    </div>
+    <div class="card">
+      <span class="card-icon">🛒</span>
+      <h3>Consumismo Acelerado</h3>
+      <p>La cultura de "siempre el último modelo" normaliza el reemplazo frecuente. El mercado global de electrónica de consumo supera los $1.1 billones anuales, impulsando demanda sin precedentes.</p>
+    </div>
+    <div class="card">
+      <span class="card-icon">⚙️</span>
+      <h3>Diseño No Reparable</h3>
+      <p>Componentes sellados, baterías no removibles y tornillos propietarios hacen imposible la reparación doméstica. El costo de reparar supera al de comprar nuevo en la mayoría de los casos.</p>
+    </div>
+    <div class="card">
+      <span class="card-icon">📋</span>
+      <h3>Regulación Deficiente</h3>
+      <p>La mayoría de países carece de legislación efectiva sobre responsabilidad extendida del productor. El e-waste se exporta ilegalmente a naciones con normativas ambientales débiles.</p>
+    </div>
+    <div class="card">
+      <span class="card-icon">🏭</span>
+      <h3>Infraestructura Escasa</h3>
+      <p>Solo 78 países cuentan con políticas de reciclaje electrónico. En América Latina, menos del 3% de los residuos electrónicos llegan a instalaciones adecuadas de tratamiento.</p>
+    </div>
+    <div class="card">
+      <span class="card-icon">💰</span>
+      <h3>Economía Lineal</h3>
+      <p>El modelo "fabricar → usar → desechar" prioriza el lucro sobre la sostenibilidad. La economía circular representa menos del 8% de la producción electrónica mundial actual.</p>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══ CONSECUENCIAS ══════════════════════════════════════ -->
+<section class="section" style="padding-top:0">
+  <div class="section-header reveal">
+    <span class="section-num">02 //</span>
+    <h2 class="section-title">CONSECUENCIAS</h2>
+  </div>
+
+  <div class="consequence-list reveal">
+    <div class="consequence-row">
+      <div class="consequence-label health">SALUD<br>HUMANA</div>
+      <p>El procesamiento informal de e-waste libera <strong>plomo, mercurio, cadmio y arsénico</strong> al aire, suelo y agua. Trabajadores en basureros electrónicos de Ghana, India y China presentan niveles de plomo en sangre 10 veces superiores al límite seguro. Los niños son especialmente vulnerables: daño neurológico permanente, retraso cognitivo y cáncer figuran entre los efectos documentados.</p>
+    </div>
+    <div class="consequence-row">
+      <div class="consequence-label env">MEDIO<br>AMBIENTE</div>
+      <p>Los metales pesados filtran hacia <strong>napas freáticas y ríos</strong>, afectando ecosistemas enteros. En Agbogbloshie (Ghana), uno de los mayores basureros de e-waste del mundo, los niveles de plomo en suelo superan 45 veces el límite permitido. La quema a cielo abierto emite <strong>dioxinas y furanos</strong>, gases altamente tóxicos y persistentes en la cadena alimentaria.</p>
+    </div>
+    <div class="consequence-row">
+      <div class="consequence-label social">JUSTICIA<br>SOCIAL</div>
+      <p>El e-waste se convierte en un problema del <strong>Sur Global</strong>. Países ricos exportan sus residuos tecnológicos a naciones pobres bajo el eufemismo de "donación de equipos usados". Comunidades vulnerables —muchas veces sin información— desmantelan equipos peligrosos a mano, exponiéndose a <strong>toxinas sin protección</strong> a cambio de pocos centavos.</p>
+    </div>
+    <div class="consequence-row">
+      <div class="consequence-label econ">IMPACTO<br>ECONÓMICO</div>
+      <p>El valor de <strong>oro, plata, cobre y tierras raras</strong> contenidos en el e-waste no reciclado equivale a $57 mil millones anuales. La minería urbana podría abastecer una fracción significativa de la demanda global de materiales críticos. En lugar de eso, financiamos nueva minería destructiva mientras enterramos el recurso ya extraído.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══ SUSTANCIAS TÓXICAS ══════════════════════════════════════ -->
+<div class="toxic-section">
+  <div class="toxic-inner">
+    <h2 class="toxic-header reveal">// SUSTANCIAS PELIGROSAS EN DISPOSITIVOS COMUNES</h2>
+    <div class="chemical-list reveal">
+      <div class="chemical-item">
+        <div class="chemical-name">Plomo (Pb)</div>
+        <div class="bar-track"><div class="bar-fill" data-width="88"></div></div>
+        <div class="chemical-desc">Soldaduras de placas. Daño neurológico irreversible, especialmente en menores.</div>
+      </div>
+      <div class="chemical-item">
+        <div class="chemical-name">Mercurio (Hg)</div>
+        <div class="bar-track"><div class="bar-fill" data-width="72"></div></div>
+        <div class="chemical-desc">Pantallas LCD y baterías. Se bioacumula en peces y tejidos humanos.</div>
+      </div>
+      <div class="chemical-item">
+        <div class="chemical-name">Cadmio (Cd)</div>
+        <div class="bar-track"><div class="bar-fill" data-width="65"></div></div>
+        <div class="chemical-desc">Baterías recargables. Cancerígeno renal, se acumula en suelos por décadas.</div>
+      </div>
+      <div class="chemical-item">
+        <div class="chemical-name">Retardantes de Llama Bromados</div>
+        <div class="bar-track"><div class="bar-fill acid-color" data-width="55"></div></div>
+        <div class="chemical-desc">Carcasas plásticas. Disruptores endocrinos, persisten en el ambiente.</div>
+      </div>
+      <div class="chemical-item">
+        <div class="chemical-name">Berilio (Be)</div>
+        <div class="bar-track"><div class="bar-fill" data-width="42"></div></div>
+        <div class="chemical-desc">Conectores y chips. El polvo inhala causa beriliosis pulmonar crónica.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SOLUCIONES ══════════════════════════════════════ -->
+<section class="section">
+  <div class="section-header reveal">
+    <span class="section-num">03 //</span>
+    <h2 class="section-title">HACIA SOLUCIONES</h2>
+  </div>
+
+  <div class="solution-grid reveal">
+    <div class="solution-card">
+      <div class="solution-num">01</div>
+      <h3>Derecho a Reparar</h3>
+      <p>Legislar la obligación de diseñar productos reparables, con piezas disponibles y manuales abiertos. La UE ya aprobó normativas en esta dirección para 2026.</p>
+    </div>
+    <div class="solution-card">
+      <div class="solution-num">02</div>
+      <h3>Responsabilidad Extendida</h3>
+      <p>Los fabricantes deben hacerse cargo del ciclo de vida completo del producto, incluyendo el costo del reciclaje seguro al momento del diseño.</p>
+    </div>
+    <div class="solution-card">
+      <div class="solution-num">03</div>
+      <h3>Puntos de Recolección</h3>
+      <p>Redes accesibles de acopio electrónico en supermercados, municipios y escuelas. La conveniencia es clave: si reciclar es fácil, la gente recicla.</p>
+    </div>
+    <div class="solution-card">
+      <div class="solution-num">04</div>
+      <h3>Economía Circular</h3>
+      <p>Diseño modular, alquiler de dispositivos en lugar de venta, y mercados de segunda mano formalizados reducen drásticamente el flujo de residuos.</p>
+    </div>
+    <div class="solution-card">
+      <div class="solution-num">05</div>
+      <h3>Educación y Conciencia</h3>
+      <p>Integrar la gestión de residuos tecnológicos en currículas escolares. El cambio cultural comienza con generaciones que comprenden las consecuencias reales del descarte.</p>
+    </div>
+    <div class="solution-card">
+      <div class="solution-num">06</div>
+      <h3>Minería Urbana</h3>
+      <p>Invertir en tecnología de recuperación de metales preciosos del e-waste. Una tonelada de placas de circuitos contiene 80× más oro que una tonelada de mineral de mina.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══ FOOTER ══════════════════════════════════════ -->
+<footer>
+  <p>E-WASTE · EL COSTO OCULTO DEL PROGRESO<br>
+  <span>62 MILLONES DE TONELADAS ANUALES</span> · UN PROBLEMA QUE CRECE 3× MÁS RÁPIDO QUE CUALQUIER OTRO RESIDUO<br>
+  DATOS: ONU MEDIO AMBIENTE · GLOBAL E-WASTE MONITOR 2024</p>
+</footer>
+
+<script>
+  // Intersection Observer for reveal animations
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => entry.target.classList.add('visible'), i * 80);
+      }
+    });
+  }, { threshold: 0.08 });
+  reveals.forEach(el => observer.observe(el));
+
+  // Animate bars when visible
+  const barObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.querySelectorAll('.bar-fill').forEach(bar => {
+          bar.style.width = bar.dataset.width + '%';
+        });
+      }
+    });
+  }, { threshold: 0.3 });
+
+  document.querySelectorAll('.chemical-list').forEach(el => barObserver.observe(el));
+</script>
+</body>
+</html>
